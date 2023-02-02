@@ -1,0 +1,32 @@
+pragma solidity ^0.8.0;
+
+import "truffle/Assert.sol";
+import "truffle/DeployedAddresses.sol";
+import "../contracts/Staking.sol";
+
+contract TestStaking {
+    Staking staking = Staking(DeployedAddresses.Staking());
+
+    function testStake() public {
+        uint256 amount = 100;
+        staking.stake(amount);
+        Assert.equal(staking.balances(msg.sender), amount, "Staking failed");
+        Assert.equal(staking.totalSupply, amount, "Total supply incorrect");
+        Assert.equal(staking.staked(msg.sender), true, "Staking status incorrect");
+    }
+
+    function testUnstake() public {
+        staking.unstake();
+        Assert.equal(staking.balances(msg.sender), 0, "Unstaking failed");
+        Assert.equal(staking.totalSupply, 0, "Total supply incorrect");
+        Assert.equal(staking.staked(msg.sender), false, "Staking status incorrect");
+    }
+
+    function testCompound() public {
+        uint256 amount = 100;
+        staking.stake(amount);
+        staking.compound();
+        Assert.equal(staking.balances(msg.sender), 110, "Compounding failed");
+        Assert.equal(staking.totalSupply, 110, "Total supply incorrect");
+    }
+}
